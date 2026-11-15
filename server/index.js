@@ -12,8 +12,10 @@ app.use(express.json());
 connectDB();
 
 app.get('/', (req, res) => {
-  res.json({ message: 'ChamazShop API is running 🚀' });
+  res.json({ message: 'ChamazShop API is running' });
 });
+
+app.use('/api/products', require('./routes/productRoutes'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

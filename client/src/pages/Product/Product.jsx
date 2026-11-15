@@ -1,12 +1,32 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { allProducts } from '../../data/products'
+import { API_URL } from '../../config'
 
 function Product() {
   const { id } = useParams()
+  const [product, setProduct] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [quantity, setQuantity] = useState(1)
 
-  const product = allProducts.find(p => p.id === Number(id))
+  useEffect(() => {
+    const loadProduct = async () => {
+      try {
+        const res = await fetch(`${API_URL}/products/${id}`)
+        if (!res.ok) throw new Error('Not found')
+        const data = await res.json()
+        setProduct(data)
+      } catch {
+        setProduct(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadProduct()
+  }, [id])
+
+  if (loading) {
+    return <p className="text-center text-gray-500 text-lg mt-20">Loading product...</p>
+  }
 
   if (!product) {
     return (
@@ -33,7 +53,10 @@ function Product() {
           <p className="text-sm text-gray-500">{product.category}</p>
           <h1 className="text-3xl font-bold text-gray-800 mb-3">{product.name}</h1>
           <p className="text-gray-600 mb-4">{product.description}</p>
-          <p className="text-green-700 font-bold text-3xl mb-6">${product.price}</p>
+          <p className="text-green-700 font-bold text-3xl mb-2">${product.price}</p>
+          <p className="text-sm text-gray-500 mb-6">
+            {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+          </p>
 
           <div className="flex items-center gap-4 mb-6">
             <button
@@ -53,7 +76,8 @@ function Product() {
 
           <button
             onClick={handleAddToCart}
-            className="bg-green-700 text-white px-8 py-3 rounded-full hover:bg-green-600 transition"
+            disabled={product.stock === 0}
+            className="bg-green-700 text-white px-8 py-3 rounded-full hover:bg-green-600 transition disabled:bg-gray-400"
           >
             Add to cart
           </button>
