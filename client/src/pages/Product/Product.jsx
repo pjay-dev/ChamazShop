@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { API_URL } from '../../config'
+import { useCart } from '../../context/CartContext'
 
 function Product() {
   const { id } = useParams()
+  const { addToCart } = useCart()
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
   const [quantity, setQuantity] = useState(1)
+  const [added, setAdded] = useState(false)
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -38,8 +41,9 @@ function Product() {
   }
 
   const handleAddToCart = () => {
-    // Placeholder: we connect this to the real cart in the next stage
-    alert(`${quantity} x ${product.name} (cart coming soon)`)
+    addToCart(product, quantity)
+    setAdded(true)
+    setTimeout(() => setAdded(false), 2000)
   }
 
   return (
@@ -74,13 +78,20 @@ function Product() {
             </button>
           </div>
 
-          <button
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-            className="bg-green-700 text-white px-8 py-3 rounded-full hover:bg-green-600 transition disabled:bg-gray-400"
-          >
-            Add to cart
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleAddToCart}
+              disabled={product.stock === 0}
+              className="bg-green-700 text-white px-8 py-3 rounded-full hover:bg-green-600 transition disabled:bg-gray-400"
+            >
+              Add to cart
+            </button>
+            {added && (
+              <span className="text-green-700 font-medium">
+                Added! <Link to="/cart" className="underline">View cart</Link>
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </div>
